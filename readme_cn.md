@@ -12,7 +12,8 @@
 ## 1、 安装方法
 ### 1. 相关依赖
 ```
-$ sudo apt-get install ros-$ROS_DISTRO-tf-transformations
+sudo apt install libopencv-dev python3-opencv
+sudo apt-get install ros-$ROS_DISTRO-tf-transformations
 ```
 
 ### 2. 相关驱动
@@ -24,11 +25,11 @@ $ sudo apt-get install ros-$ROS_DISTRO-tf-transformations
 
 ### 3. 安装编译
 ```
-$ mkdir -p ros2_ws/src
-$ cd ros2_ws/src
-$ git clone 
-$ cd ..
-$ colcon build --symlink-install
+mkdir -p ros2_ws/src
+cd ros2_ws/src
+git clone 
+cd ..
+colcon build --symlink-install
 ```
 
 ## 2、 使用
@@ -37,13 +38,13 @@ $ colcon build --symlink-install
 
 ### 2. 启动机械臂
 ```
-$ ros2 launch piper start_single_piper.launch.py can_port:=can0
+ros2 launch piper start_single_piper.launch.py can_port:=can0
 ```
 > 注意机械臂需要进入**示教模式**        
 
 ### 3.  启动相机识别
 ```
-$ ros2 launch aruco_ros single.launch
+ros2 launch aruco_ros single.launch
 ```
 > 需要提前在launch中更改marker的size和id，以及图像话题和frame
 
@@ -53,13 +54,13 @@ $ ros2 launch aruco_ros single.launch
 
 - 眼在手上
 ```
-$ ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic:=/piper_ctrl_node/end_pose -p marker_topic:=/aruco_single/pose  -p mode:=eye_in_hand
+ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic:=/piper_ctrl_node/end_pose -p marker_topic:=/aruco_single/pose  -p mode:=eye_in_hand
 ```
 > 采集说明：摄像头固定在机械臂末端，标定码平放在桌上。操作机械臂让摄像头能够识别出桌上的标定码。
 
 - 眼在手外
 ```
-$ ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic:=/piper_ctrl_node/end_pose -p marker_topic:=/aruco_single/pose  -p mode:=eye_to_hand
+ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic:=/end_pose -p marker_topic:=/aruco_single/pose  -p mode:=eye_to_hand
 ```
 > 采集说明：需要标定摄像头固定在某个位置，标定码固定在机械臂末端。操作机械臂让摄像头能够识别出机械臂末端的标定码。
 
@@ -72,3 +73,23 @@ $ ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic
 |min_num|int|10|最少采集次数|
 |piper_topic|string|piper_ctrl_node/end_pose|机械臂末端位姿话题（geometry_msgs/Pose）|
 |marker_topic|string|aruco_single/pose|摄像头识别标定板位姿话题（geometry_msgs/PoseStamped）|
+
+## 3. 手眼标定精度检测
+
+### 1. 启动机械臂
+```
+ros2 launch piper start_single_piper.launch.py can_port:=can0
+```
+
+### 2. 启动手眼标定精度检测程序
+```
+ros2 launch handeye_calibration_ros calibration_evaluate_launch.py mode:=eye_in_hand transform_file:=./src/handeye_calibration_ros/result/eye_in_hand.json
+```
+> 注意：本程序仅适用于 IntelRealSense D435 摄像头，其他摄像头请自行修改。并且该程序中发布机械臂末端位姿时，旋转受约束：机械臂目标位姿始终垂直于地面，位置仍可自由控制。请按需自行修改。
+
+- 相关参数
+
+| 参数           | 类型   | 默认值                                                | 说明                 |
+|----------------|--------|-------------------------------------------------------|----------------------|
+| mode           | string | eye_in_hand                                           | 手眼标定模式         |
+| transform_file | string | ./src/handeye_calibration_ros/result/eye_in_hand.json | 手眼标定结果文件路径 |

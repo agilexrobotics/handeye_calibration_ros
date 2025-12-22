@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'handeye_calibration = handeye_calibration_ros.handeye_calibration:main',
+            'calibration_evaluate = handeye_calibration_ros.calibration_evaluate:main',
         ],
     }
 )

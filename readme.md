@@ -13,8 +13,8 @@ By collecting multiple sets of end-effector poses from the robotic arm and camer
 ## 1. Installation
 ### 1.1 Dependencies
 ```
-$ sudo apt install libopencv-dev python3-opencv
-$ sudo apt-get install ros-$ROS_DISTRO-tf-transformations
+sudo apt install libopencv-dev python3-opencv
+sudo apt-get install ros-$ROS_DISTRO-tf-transformations
 ```
 
 ### 1.2 Drivers
@@ -27,11 +27,11 @@ For testing, we used the `Original ArUco` dictionary calibration board and the `
 
 ### 1.3 Build from source
 ```
-$ mkdir -p ros2_ws/src
-$ cd ros2_ws/src
-$ git clone 
-$ cd ..
-$ colcon build --symlink-install
+mkdir -p ros2_ws/src
+cd ros2_ws/src
+git clone 
+cd ..
+colcon build --symlink-install
 ```
 
 ## 2. Directly run
@@ -40,13 +40,13 @@ $ colcon build --symlink-install
 
 ### 2.2 Start Robot Arm
 ```
-$ ros2 launch piper start_single_piper.launch.py can_port:=can0
+ros2 launch piper start_single_piper.launch.py can_port:=can0
 ```
 - The robotic arm must be in **teaching mode**.
 
 ### 2.3 Start Camera Recognition
 ```
-$ ros2 launch aruco_ros single.launch
+ros2 launch aruco_ros single.launch
 ```
 - Need to correct the **marker's size** and **id**, as well as the **image topic** and **frame_id**.
 
@@ -57,14 +57,14 @@ Usage: `enter` collects a set of data, `d` deletes a set of data, `q` calculates
 
 #### 2.4.1 Eye in Hand
 ```
-$ ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic:=/piper_ctrl_node/end_pose -p marker_topic:=/aruco_single/pose  -p mode:=eye_in_hand
+ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic:=/end_pose -p marker_topic:=/aruco_single/pose  -p mode:=eye_in_hand
 ```
 - Collection Instructions: The camera is fixed at the end of the robotic arm, and the calibration board is placed flat on the table. Operate the robotic arm to allow the camera to recognize the calibration board on the table.
 
 #### 2.4.2 Eye to Hand
 
 ```
-$ ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic:=/piper_ctrl_node/end_pose -p marker_topic:=/aruco_single/pose  -p mode:=eye_to_hand
+ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic:=/piper_ctrl_node/end_pose -p marker_topic:=/aruco_single/pose  -p mode:=eye_to_hand
 ```
 - Collection Instructions: The camera is fixed at a specific position, and the calibration board is fixed at the end of the robotic arm. Operate the robotic arm to allow the camera to recognize the calibration board at the arm's end.
 
@@ -77,3 +77,24 @@ $ ros2 run handeye_calibration_ros handeye_calibration --ros-args -p piper_topic
 |min_num|int|10|minimum number of data sets|
 |piper_topic|string|piper_ctrl_node/end_pose|robotic arm's end-effector(geometry_msgs/Pose)|
 |marker_topic|string|aruco_single/pose|camera-recognized calibration board pose topic（geometry_msgs/PoseStamped）|
+
+## 3. Hand-Eye Calibration Accuracy Evaluation
+
+### 1. Start the robotic arm**  
+```
+ros2 launch piper start_single_piper.launch.py can_port:=can0
+```
+
+### 2. Launch the hand-eye calibration accuracy-evaluation node 
+```
+ros2 launch handeye_calibration_ros calibration_evaluate_launch.py mode:=eye_in_hand transform_file:=./src/handeye_calibration_ros/result/eye_in_hand.json
+```
+> Note: This node is written specifically for the Intel RealSense D435 camera; adapt it for any other camera as needed. While publishing the end-effector pose, the node enforces a constraint: the tool’s orientation is always kept perpendicular to the ground, although its 3-D position can still be controlled freely. Modify this behavior if required.
+
+
+- parameters
+
+| parameter      | type   | default                                               | description             |
+|----------------|--------|-------------------------------------------------------|-------------------------|
+| mode           | string | eye_in_hand                                           | calibration mode        |
+| transform_file | string | ./src/handeye_calibration_ros/result/eye_in_hand.json | calibration result file |
