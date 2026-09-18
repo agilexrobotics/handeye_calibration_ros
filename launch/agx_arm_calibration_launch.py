@@ -6,22 +6,22 @@ from launch_ros.actions import Node
 
 
 def launch_setup(context, *args, **kwargs):
-    aruco_single_params = {
+    params = {
         'mode': LaunchConfiguration('mode'),
         'min_num': LaunchConfiguration('min_num'),
-        'piper_topic': LaunchConfiguration('piper_topic'),
+        'agx_arm_topic': LaunchConfiguration('agx_arm_topic'),
         'marker_topic': LaunchConfiguration('marker_topic'),
     }
 
-    aruco_single = Node(
+    calibration_node = Node(
         package='handeye_calibration_ros', 
-        executable='handeye_calibration', 
-        name="handeye_calibration",
+        executable='agx_arm_calibration', 
+        name="agx_arm_calibration",
         output='screen',
-        parameters=[aruco_single_params],
+        parameters=[params],
     )
 
-    return [aruco_single]
+    return [calibration_node]
 
 
 def generate_launch_description():
@@ -39,15 +39,15 @@ def generate_launch_description():
         description=''
     )
 
-    piper_topic_arg = DeclareLaunchArgument(
-        'piper_topic',
-        default_value='/end_pose',
+    agx_arm_topic_arg = DeclareLaunchArgument(
+        'agx_arm_topic',
+        default_value='/feedback/tcp_pose',
         description=''
     )
 
     marker_topic_arg = DeclareLaunchArgument(
         'marker_topic',
-        default_value='aruco_single/pose',
+        default_value='/aruco_single/pose',
         description=''
     )
 
@@ -56,10 +56,9 @@ def generate_launch_description():
 
     ld.add_action(mode_arg)
     ld.add_action(min_num_arg)
-    ld.add_action(piper_topic_arg)
+    ld.add_action(agx_arm_topic_arg)
     ld.add_action(marker_topic_arg)
 
     ld.add_action(OpaqueFunction(function=launch_setup))
 
     return ld
-
